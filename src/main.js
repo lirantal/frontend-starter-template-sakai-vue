@@ -105,6 +105,22 @@ import BlockViewer from '@/components/BlockViewer.vue';
 
 import '@/assets/styles.scss';
 
+import SuperTokens from 'supertokens-web-js';
+import Session from 'supertokens-web-js/recipe/session';
+import EmailPassword from 'supertokens-web-js/recipe/emailpassword'
+
+SuperTokens.init({
+    appInfo: {
+        apiDomain: "http://localhost:3001",
+        apiBasePath: "/auth",
+        appName: "Alpha",
+    },
+    recipeList: [
+        Session.init(),
+        EmailPassword.init(),
+    ],
+});
+
 const app = createApp(App);
 
 app.use(router);

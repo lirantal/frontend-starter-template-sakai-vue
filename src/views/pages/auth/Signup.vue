@@ -2,24 +2,32 @@
 import { useLayout } from '@/layout/composables/layout';
 import { ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
-import { signIn } from "supertokens-web-js/recipe/emailpassword";
+import { signUp } from "supertokens-web-js/recipe/emailpassword";
 
 const { layoutConfig, contextPath } = useLayout();
 const email = ref('');
 const password = ref('');
-const checked = ref(false);
 
 const logoUrl = computed(() => {
     return `${contextPath}layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
 });
 
-async function signInClicked() {
+let count = ref(0)
+function increment() {
+    count.value++
+}
+
+async function signUpClicked() {
+    console.log('signUpClicked')
+    console.log(email.value)
+    console.log(password.value)
+    // return;
 
     const emailValue = email.value
     const passwordValue = password.value
 
     try {
-        let response = await signIn({
+        let response = await signUp({
             formFields: [{
                 id: "email",
                 value: emailValue
@@ -30,22 +38,26 @@ async function signInClicked() {
         })
 
         if (response.status === "FIELD_ERROR") {
+            // one of the input formFields failed validaiton
             response.formFields.forEach(formField => {
                 if (formField.id === "email") {
-                    // Email validation failed (for example incorrect email syntax).
+                    // Email validation failed (for example incorrect email syntax),
+                    // or the email is not unique.
+                    window.alert(formField.error)
+                } else if (formField.id === "password") {
+                    // Password validation failed.
+                    // Maybe it didn't match the password strength
                     window.alert(formField.error)
                 }
             })
-        } else if (response.status === "WRONG_CREDENTIALS_ERROR") {
-            window.alert("Email password combination is incorrect.")
         } else {
-            // sign in successful. The session tokens are automatically handled by
+            // sign up successful. The session tokens are automatically handled by
             // the frontend SDK.
             window.location.href = "/"
         }
     } catch (err) {
-        console.log('error signning in');
-        console.log(err);
+        console.log('err')
+        console.log(err)
         if (err.isSuperTokensGeneralError === true) {
             // this may be a custom error message sent from the API by you.
             window.alert(err.message);
@@ -55,8 +67,9 @@ async function signInClicked() {
     }
 }
 
-
 </script>
+
+
 
 <template>
     <div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
@@ -66,8 +79,8 @@ async function signInClicked() {
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
                         <img src="/demo/images/login/avatar.png" alt="Image" height="50" class="mb-3" />
-                        <div class="text-900 text-3xl font-medium mb-3">Welcome, Isabel!</div>
-                        <span class="text-600 font-medium">Sign in to continue</span>
+                        <div class="text-900 text-3xl font-medium mb-3">Welcome, new user!</div>
+                        <span class="text-600 font-medium">Sign up</span>
                     </div>
 
                     <div>
@@ -77,14 +90,9 @@ async function signInClicked() {
                         <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
                         <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="w-full mb-3" inputClass="w-full" inputStyle="padding:1rem"></Password>
 
-                        <div class="flex align-items-center justify-content-between mb-5 gap-5">
-                            <div class="flex align-items-center">
-                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
-                                <label for="rememberme1">Remember me</label>
-                            </div>
-                            <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
-                        </div>
-                        <Button @click="signInClicked" label="Sign In" class="w-full p-3 text-xl"></Button>
+                        <Button @click="signUpClicked" label="Sign Up" class="w-full p-3 text-xl"></Button>
+                        <!-- <br/> -->
+                        <!-- <button @click="increment">Count is: {{ count }}</button> -->
                     </div>
                 </div>
             </div>

@@ -1,5 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
+import Session from 'supertokens-web-js/recipe/session';
+
+async function doesSessionExist() {
+    if (await Session.doesSessionExist()) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 const router = createRouter({
     history: createWebHistory(),
@@ -7,6 +16,9 @@ const router = createRouter({
         {
             path: '/',
             component: AppLayout,
+            meta: {
+                requiresAuth: true
+            },
             children: [
                 {
                     path: '/',
@@ -160,6 +172,11 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Login.vue')
         },
         {
+            path: '/auth/signup',
+            name: 'signup',
+            component: () => import('@/views/pages/auth/Signup.vue')
+        },
+        {
             path: '/auth/access',
             name: 'accessDenied',
             component: () => import('@/views/pages/auth/Access.vue')
@@ -170,6 +187,24 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Error.vue')
         }
     ]
+});
+
+// router should check for authorizes user if logged in or not
+router.beforeEach(async (to, from, next) => {
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+        // this route requires auth, check if logged in
+        // if not, redirect to login page.
+        if (await Session.doesSessionExist()) {
+            next();
+        } else {
+            next({
+                path: '/auth/login',
+                query: { redirect: to.fullPath }
+            });
+        }
+    } else {
+        next(); // does not require auth, make sure to always call next()!
+    }
 });
 
 export default router;
