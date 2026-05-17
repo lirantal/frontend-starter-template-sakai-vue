@@ -33,3 +33,7 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Contributing
+
+Please consult [CONTRIBUTING](./CONTRIBUTING.md) for guidelines on contributing to this project.
